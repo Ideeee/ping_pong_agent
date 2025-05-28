@@ -1,3 +1,4 @@
+import os
 from pprint import pprint
 import uvicorn, json
 from fastapi import FastAPI, Request
@@ -76,4 +77,5 @@ async def handle_task(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=4000, reload=True)
+    port = int(os.getenv("PORT", 10000))
+    uvicorn.run("main:app", host="0.0.0.0", port=4000, reload=True)
