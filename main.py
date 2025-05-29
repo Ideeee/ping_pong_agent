@@ -83,7 +83,7 @@ async def handle_task(request: Request):
         "result": message.model_dump()
     }
 
-    response = schemas.JSONRPCResponse.model_validate(response)
+    response = schemas.JSONRPCResponse.model_validate(response).model_dump()
 
     pprint(response)
     return response
