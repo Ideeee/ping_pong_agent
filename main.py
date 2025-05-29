@@ -1,6 +1,7 @@
-import os
+import os, random
 from pprint import pprint
 import uvicorn, json
+import schemas
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from a2a.utils import new_agent_text_message
@@ -11,11 +12,17 @@ RAW_AGENT_CARD_DATA = {
   "name": "PingPongAgent",
   "description": "An agent that responds 'pong' to 'ping'.",
   "url": "http://localhost:4000",
+  "provider": {
+      "organization": "Telex Org.",
+      "url": "https://telex.im"
+    },
   "version": "1.0.0",
   "capabilities": {
     "streaming": False,
     "pushNotifications": False
   },
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain"],
   "skills": [
     {
       "id": "ping",
@@ -44,17 +51,21 @@ def agent_card(request: Request):
     current_base_url = str(request.base_url).rstrip("/")
 
     response_agent_card = RAW_AGENT_CARD_DATA.copy()
+    # new_name = f"{response_agent_card['name']}{random.randint(1, 1000)}"
+    # print(new_name)
+    # response_agent_card["name"] = new_name
     response_agent_card["url"] = current_base_url
+    response_agent_card["provider"]["url"] = current_base_url
 
     return response_agent_card
 
 
 
-@app.post("/task/send")
+@app.post("/")
 async def handle_task(request: Request):
     body = await request.json()
 
-    task_id = body.get("id")
+    request_id = body.get("id")
     message = body["params"]["message"]["parts"][0].get("text", None)
 
     if message and message.lower() == "ping":
@@ -68,9 +79,11 @@ async def handle_task(request: Request):
 
     response = {
         "jsonrpc": "2.0",
-        "id": task_id,
+        "id": request_id,
         "result": message.model_dump()
     }
+
+    response = schemas.JSONRPCResponse.model_validate(response)
 
     pprint(response)
     return response
