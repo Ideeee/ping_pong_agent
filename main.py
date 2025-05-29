@@ -76,11 +76,16 @@ async def handle_task(request: Request):
 
     message = new_agent_text_message(text=text)
 
+    message = message.model_dump(exclude_none=True)
+
+    if len(message["parts"]) > 0:
+      message["parts"][0]["type"] = message["parts"][0]["kind"]
+      message["parts"][0].pop("kind", None)
 
     response = {
         "jsonrpc": "2.0",
         "id": request_id,
-        "result": message.model_dump()
+        "result": message
     }
 
     response = schemas.JSONRPCResponse.model_validate(response).model_dump()
