@@ -74,7 +74,7 @@ async def handle_task(request: Request):
     else:
         text = "I only understand 'ping'"
 
-    message = new_agent_text_message(text=text, task_id=task_id)
+    message = new_agent_text_message(text=text)
 
 
     response = {
