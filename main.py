@@ -54,7 +54,7 @@ def agent_card(request: Request):
     response_agent_card = RAW_AGENT_CARD_DATA.copy()
     # new_name = f"{response_agent_card['name']}{random.randint(1, 1000)}"
     # print(new_name)
-    response_agent_card["name"] = "PingPongAgent990"
+    # response_agent_card["name"] = "PingPongAgent990"
     response_agent_card["url"] = current_base_url
     response_agent_card["provider"]["url"] = current_base_url
 
