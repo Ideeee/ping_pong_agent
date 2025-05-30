@@ -2,7 +2,8 @@ import os, random
 from pprint import pprint
 import uvicorn, json
 import schemas
-from fastapi import FastAPI, Request
+from uuid import uuid4
+from fastapi import FastAPI, Request, status, HTTPException
 from fastapi.responses import HTMLResponse
 from a2a.utils import new_agent_text_message
 
@@ -53,45 +54,84 @@ def agent_card(request: Request):
     response_agent_card = RAW_AGENT_CARD_DATA.copy()
     # new_name = f"{response_agent_card['name']}{random.randint(1, 1000)}"
     # print(new_name)
-    # response_agent_card["name"] = new_name
+    response_agent_card["name"] = "PingPongAgent990"
     response_agent_card["url"] = current_base_url
     response_agent_card["provider"]["url"] = current_base_url
 
     return response_agent_card
 
 
+async def handle_task_send(message:str, request_id, task_id=None):
+  if message.lower() == "ping":
+    text = "pong"
+
+  else:
+    text = "I only understand 'ping'"
+
+  parts = schemas.TextPart(type="text", text=text)
+
+  message = schemas.Message(role="agent", parts=[parts])
+
+  artifacts = schemas.Artifact(parts=[parts])
+
+  task = schemas.Task(
+      id = task_id or uuid4().hex,
+      status =  schemas.TaskStatus(state=schemas.TaskState.COMPLETED),
+      artifacts = [artifacts]
+  )
+
+  response = schemas.SendTaskResponse(
+      id=request_id,
+      result=task
+  )
+
+  return response
+
+
 
 @app.post("/")
 async def handle_task(request: Request):
+  try:
     body = await request.json()
-
     request_id = body.get("id")
+    task_id = body["params"]["id"]
+
     message = body["params"]["message"]["parts"][0].get("text", None)
 
-    if message and message.lower() == "ping":
-        text = "pong"
+    if not message:
+      raise HTTPException(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        detail="Message cannot be empty."
+      )
+    
+    response = await handle_task_send(message=message, request_id=request_id, task_id=task_id)
 
-    else:
-        text = "I only understand 'ping'"
+  except json.JSONDecodeError as e:
+    error = schemas.JSONParseError(
+      data = str(e)
+    )
 
-    message = new_agent_text_message(text=text)
+    request = await request.json()
+    response = schemas.JSONRPCResponse(
+       id=request.get("id"),
+       error=error
+    )
 
-    message = message.model_dump(exclude_none=True)
+  except Exception as e:
+    error = schemas.JSONRPCError(
+      code = -32600,
+      message = str(e)
+    )
 
-    if len(message["parts"]) > 0:
-      message["parts"][0]["type"] = message["parts"][0]["kind"]
-      message["parts"][0].pop("kind", None)
+    request = await request.json()
+    response = schemas.JSONRPCResponse(
+       id=request.get("id"),
+       error=error
+    )
 
-    response = {
-        "jsonrpc": "2.0",
-        "id": request_id,
-        "result": message
-    }
-
-    response = schemas.JSONRPCResponse.model_validate(response).model_dump()
-
-    pprint(response)
-    return response
+  response = response.model_dump(exclude_none=True)
+  pprint(response)
+  return response
 
 
 if __name__ == "__main__":
