@@ -64,7 +64,7 @@ Part = Annotated[TextPart | FilePart | DataPart, Field(discriminator='type')]
 class Message(BaseModel):
     role: Literal['user', 'agent']
     parts: list[Part]
-    message_id: str = uuid4().hex
+    messageId: str = uuid4().hex
     kind: Literal['message'] = "message"
     metadata: dict[str, Any] | None = None
 
