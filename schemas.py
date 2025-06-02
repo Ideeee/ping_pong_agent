@@ -64,6 +64,8 @@ Part = Annotated[TextPart | FilePart | DataPart, Field(discriminator='type')]
 class Message(BaseModel):
     role: Literal['user', 'agent']
     parts: list[Part]
+    message_id: str = uuid4().hex
+    kind: Literal['message'] = "message"
     metadata: dict[str, Any] | None = None
 
 
@@ -175,8 +177,8 @@ class SendTaskRequest(JSONRPCRequest):
     params: TaskSendParams
 
 
-class SendTaskResponse(JSONRPCResponse):
-    result: Task | None = None
+class SendResponse(JSONRPCResponse):
+    result: Task | Message | None = None
 
 
 class SendTaskStreamingRequest(JSONRPCRequest):

@@ -72,17 +72,17 @@ async def handle_task_send(message:str, request_id, task_id=None):
 
   message = schemas.Message(role="agent", parts=[parts])
 
-  artifacts = schemas.Artifact(parts=[parts])
+  # artifacts = schemas.Artifact(parts=[parts])
 
-  task = schemas.Task(
-      id = task_id or uuid4().hex,
-      status =  schemas.TaskStatus(state=schemas.TaskState.COMPLETED),
-      artifacts = [artifacts]
-  )
+  # task = schemas.Task(
+  #     id = task_id or uuid4().hex,
+  #     status =  schemas.TaskStatus(state=schemas.TaskState.COMPLETED),
+  #     artifacts = [artifacts]
+  # )
 
-  response = schemas.SendTaskResponse(
+  response = schemas.SendResponse(
       id=request_id,
-      result=task
+      result=message
   )
 
   return response
