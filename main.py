@@ -61,7 +61,7 @@ def agent_card(request: Request):
     return response_agent_card
 
 
-async def handle_task_send(message:str, request_id, task_id=None):
+async def handle_task_send(message:str, request_id):
   if message.lower() == "ping":
     text = "pong"
 
@@ -94,7 +94,6 @@ async def handle_task(request: Request):
   try:
     body = await request.json()
     request_id = body.get("id")
-    task_id = body["params"]["id"]
 
     message = body["params"]["message"]["parts"][0].get("text", None)
 
@@ -104,7 +103,7 @@ async def handle_task(request: Request):
         detail="Message cannot be empty."
       )
     
-    response = await handle_task_send(message=message, request_id=request_id, task_id=task_id)
+    response = await handle_task_send(message=message, request_id=request_id)
 
   except json.JSONDecodeError as e:
     error = schemas.JSONParseError(
