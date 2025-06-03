@@ -22,7 +22,7 @@ class TaskState(str, Enum):
 
 
 class TextPart(BaseModel):
-    type: Literal['text'] = 'text'
+    kind: Literal['text'] = 'text'
     text: str
     metadata: dict[str, Any] | None = None
 
@@ -47,18 +47,18 @@ class FileContent(BaseModel):
 
 
 class FilePart(BaseModel):
-    type: Literal['file'] = 'file'
+    kind: Literal['file'] = 'file'
     file: FileContent
     metadata: dict[str, Any] | None = None
 
 
 class DataPart(BaseModel):
-    type: Literal['data'] = 'data'
+    kind: Literal['data'] = 'data'
     data: dict[str, Any]
     metadata: dict[str, Any] | None = None
 
 
-Part = Annotated[TextPart | FilePart | DataPart, Field(discriminator='type')]
+Part = Annotated[TextPart | FilePart | DataPart, Field(discriminator='kind')]
 
 
 class Message(BaseModel):
