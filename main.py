@@ -20,7 +20,7 @@ RAW_AGENT_CARD_DATA = {
   "version": "1.0.0",
   "capabilities": {
     "streaming": False,
-    "pushNotifications": False
+    "pushNotifications": True
   },
   "defaultInputModes": ["text/plain"],
   "defaultOutputModes": ["text/plain"],
@@ -94,7 +94,7 @@ async def handle_task(request: Request):
   try:
     body = await request.json()
     request_id = body.get("id")
-
+    pprint(body)
     message = body["params"]["message"]["parts"][0].get("text", None)
 
     if not message:
