@@ -67,7 +67,7 @@ async def handle_task_send(message:str, request_id):
     text = "pong"
 
   else:
-    text = "I only understand 'ping'"
+    text = "I only understand 'ping', please send 'ping' to get a response."
 
   parts = schemas.TextPart(type="text", text=text)
 
